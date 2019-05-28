@@ -10,6 +10,8 @@ class FavoriteListViewController: UITableViewController {
     
     let searchController = UISearchController(searchResultsController: nil)
     
+    let favoriteJSON = fileJSON.favorite.rawValue
+    
     override func viewDidLoad() {
         
         self.tableView.delegate = self
@@ -36,16 +38,12 @@ class FavoriteListViewController: UITableViewController {
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         
-        
-        debugPrint("Loading favorite movies")
-        
         do {
-            
-            retrievedFavorites = try Disk.retrieve("favorite.json", from: .applicationSupport, as: [Movie].self)
+            retrievedFavorites = try Disk.retrieve(favoriteJSON, from: .applicationSupport, as: [Movie].self)
             if let retrievedMovies = retrievedFavorites {
                 finishLoading(movies: retrievedMovies)
             }
-            dump(retrievedFavorites)
+            //dump(retrievedFavorites)
             
             
         } catch {
@@ -62,7 +60,6 @@ class FavoriteListViewController: UITableViewController {
     
     
     func searchBarIsEmpty() -> Bool {
-        // Returns true if the text is empty or nil
         return searchController.searchBar.text?.isEmpty ?? true
     }
     
@@ -102,13 +99,15 @@ class FavoriteListViewController: UITableViewController {
         if isFiltering() {
             if let movie = filteredMovies?[indexPath.row] {
                 showMovieIn(cell: cell, movie: movie)
+                cell.setMovie(movie: movie)
             }
         } else {
             if let movie = retrievedFavorites?[indexPath.row] {
                 showMovieIn(cell: cell, movie: movie)
+                cell.setMovie(movie: movie)
             }
         }
-        
+        cell.delegate = self
         return cell
     }
     
@@ -123,9 +122,9 @@ class FavoriteListViewController: UITableViewController {
         }
         
         if movie.favorited {
-            cell.backgroundColor = .lightGray
+            cell.favoriteCellButton.setImage(UIImage(imageLiteralResourceName: "favorite_full_icon"), for: .normal)
         } else {
-            cell.backgroundColor = .clear
+            cell.favoriteCellButton.setImage(UIImage(imageLiteralResourceName: "favorite_empty_icon"), for: .normal)
         }
     }
     
@@ -141,7 +140,6 @@ class FavoriteListViewController: UITableViewController {
                 if (self.filteredMovies?[indexPath.row]) != nil {
                     deleteMovie = self.filteredMovies![indexPath.row]
                     self.filteredMovies![indexPath.row].favorited = false
-                    //self.retrievedFavorites?.removeAll{$0.id == deleteMovie?.id }
                 }
                 else { return }
             }
@@ -151,12 +149,6 @@ class FavoriteListViewController: UITableViewController {
                 if (fav?.index{ $0.id == deleteMovie?.id}) != nil {
                     fav?.removeAll{$0.id == deleteMovie?.id }
                     try? Disk.save(fav, to: .applicationSupport, as: "favorite.json")
-//                    if self.isFiltering() {
-//                        self.retrievedFavorites?.removeAll{$0.id == deleteMovie?.id }
-//                    } else {
-//                        self.retrievedFavorites?[indexPath.row].favorited = false
-//                    }
-                    //self.retrievedFavorites?[indexPath.row].favorited = false
                     self.retrievedFavorites?.removeAll{$0.id == deleteMovie?.id }
                     completionHandler(true)
                 } else {
@@ -182,30 +174,35 @@ class FavoriteListViewController: UITableViewController {
     // MARK: - Navigation
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         
-//        if isFiltering() {
-//            if let index = self.tableView.indexPathForSelectedRow?.row {
-//                if let destination = segue.destination as? MovieDetailView {
-//                    if let movie = self.filteredMovies?[index] {
-//                        destination.setMovie(movie: movie)
-//                    }
-//                }
-//            }
-//            return
-//        }
-        
         if let index = self.tableView.indexPathForSelectedRow?.row,
-            //let movie = self.tableData?[index] ?? self.retrievedFavorites?[index]
             let movie = self.retrievedFavorites?[index]
         {
             if let destination = segue.destination as? MovieDetailView {
                 destination.setMovie(movie: movie)
             }
         }
-        
-        
     }
+}
 
-    
+extension FavoriteListViewController: FavoriteCellDelegate {
+    func didTapFavoriteButton(movie: Movie) -> Bool {
+        print("Movie: \(movie.title)")
+        
+        if Disk.exists("favorite.json", in: .applicationSupport) {
+            
+            var fav = try? Disk.retrieve("favorite.json", from: .applicationSupport, as: [Movie].self)
+            if (fav?.index{ $0.id == movie.id}) != nil {
+                fav?.removeAll{$0.id == movie.id }
+                try? Disk.save(fav, to: .applicationSupport, as: "favorite.json")
+                self.retrievedFavorites?.removeAll{$0.id == movie.id }
+            }
+            if isFiltering() {
+                self.filteredMovies!.removeAll{$0.id == movie.id }
+            }
+        }
+        self.tableView.reloadData()
+        return false
+    }
 }
 
 extension FavoriteListViewController: UISearchResultsUpdating {

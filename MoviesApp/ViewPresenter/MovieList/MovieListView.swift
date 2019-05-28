@@ -49,8 +49,6 @@ class MovieListViewController: UITableViewController {
         
         self.tableView.reloadData()
         
-        
-        //debugPrint("Popular will appear")
         self.presenter.loadGenreAndMovies()
         
         // TODO: add loading view
@@ -64,18 +62,10 @@ class MovieListViewController: UITableViewController {
     
     func filterContentForSearchText (_ searchText: String, scope: String = "All") {
 
-        //            filteredMovies = (tableData?.filter({ (movie: Movie) -> Bool in
-        //                return movie.title.lowercased().contains(searchText.lowercased())
-        //            }))!
-        //            tableView.reloadData()
-
         if !searchText.isEmpty {
-            //self.presenter.isFiltering = true
             self.presenter.movies = nil
             self.presenter.search(query: searchText)
         } else {
-            debugPrint("Search text está vazio")
-            //self.presenter.isFiltering = false
             self.presenter.isLoading = false
             self.presenter.movies = nil
             self.presenter.loadGenre()
@@ -101,6 +91,8 @@ class MovieListViewController: UITableViewController {
         }
     }
     
+    // MARK: UITableView Swipe Actions
+    
     //Slide to favorite
     @available(iOS 11.0, *)
     override func tableView(_ tableView: UITableView, leadingSwipeActionsConfigurationForRowAt indexPath: IndexPath) -> UISwipeActionsConfiguration? {
@@ -108,9 +100,6 @@ class MovieListViewController: UITableViewController {
         let action = UIContextualAction(style: .normal, title: "Favorite", handler: { (action, view, completionHandler) in
             var movie = self.tableData?[indexPath.row]
             
-            //if self.isFiltering() {
-            //    movie = self.filteredMovies?[indexPath.row]
-            //}
             if Disk.exists("favorite.json", in: .applicationSupport) {
                 
                 let fav = try? Disk.retrieve("favorite.json", from: .applicationSupport, as: [Movie].self)
@@ -141,16 +130,6 @@ class MovieListViewController: UITableViewController {
             deleteMovie = self.tableData?[indexPath.row]
             self.tableData?[indexPath.row].favorited = false
             
-            //if self.isFiltering() {
-            //    if (self.filteredMovies?[indexPath.row]) != nil {
-            //        deleteMovie = self.filteredMovies![indexPath.row]
-            //        self.filteredMovies![indexPath.row].favorited = false
-            //        if let index = self.tableData?.index(where: {$0.id == deleteMovie?.id}) {
-            //            self.tableData?[index].favorited = false
-            //        }
-            //    }
-            //    else { return }
-            //}
             if Disk.exists("favorite.json", in: .applicationSupport) {
                 
                 var fav = try? Disk.retrieve("favorite.json", from: .applicationSupport, as: [Movie].self)
@@ -176,17 +155,6 @@ class MovieListViewController: UITableViewController {
     
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
       
-        //if isFiltering() {
-        //    if let index = self.tableView.indexPathForSelectedRow?.row {
-        //        if let destination = segue.destination as? MovieDetailView {
-        //            if let movie = self.filteredMovies?[index] {
-        //                destination.setMovie(movie: movie)
-        //            }
-        //        }
-        //    }
-        //    return
-        //}
-
         if let index = self.tableView.indexPathForSelectedRow?.row,
             let movie = self.tableData?[index]
         {
@@ -194,8 +162,6 @@ class MovieListViewController: UITableViewController {
                 destination.setMovie(movie: movie)
             }
         }
-
-        
     }
     
     
@@ -206,10 +172,6 @@ class MovieListViewController: UITableViewController {
     }
     
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        //if isFiltering() {
-        //    return filteredMovies?.count ?? 0
-        //}
-        
         return self.tableData?.count ?? 0
         
     }
@@ -217,19 +179,12 @@ class MovieListViewController: UITableViewController {
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell: MovieListCell = tableView.dequeueReusableCell(withIdentifier: "MovieListCell", for: indexPath) as! MovieListCell
         
-        //if isFiltering() {
-        //    if let movie = filteredMovies?[indexPath.row] {
-        //        showMovieIn(cell: cell, movie: movie)
-        //    }
-        //
-        //} else {
-        
-            if let movie = tableData?[indexPath.row] {
-                showMovieIn(cell: cell, movie: movie)
-            }
-            
-        //}
-        
+        if let movie = tableData?[indexPath.row] {
+            showMovieIn(cell: cell, movie: movie)
+            cell.setMovie(movie: movie)
+        }
+
+        cell.delegate = self
         return cell
     }
     
@@ -244,9 +199,9 @@ class MovieListViewController: UITableViewController {
         }
         
         if movie.favorited {
-            cell.backgroundColor = .lightGray
+            cell.favoriteCellButton.setImage(UIImage(imageLiteralResourceName: "favorite_full_icon"), for: .normal)
         } else {
-            cell.backgroundColor = .clear
+            cell.favoriteCellButton.setImage(UIImage(imageLiteralResourceName: "favorite_empty_icon"), for: .normal)
         }
     }
     
@@ -263,6 +218,31 @@ extension MovieListViewController: UISearchResultsUpdating {
         filterContentForSearchText(searchController.searchBar.text!)
     }
     
+    
+}
+
+extension MovieListViewController: FavoriteCellDelegate {
+    func didTapFavoriteButton(movie: Movie) -> Bool {
+        
+        self.tableView.reloadData()
+            
+        if Disk.exists("favorite.json", in: .applicationSupport) {
+            
+            var fav = try? Disk.retrieve("favorite.json", from: .applicationSupport, as: [Movie].self)
+            if (fav?.index{ $0.id == movie.id}) != nil {
+                fav?.removeAll{$0.id == movie.id}
+                try? Disk.save(fav, to: .applicationSupport, as: "favorite.json")
+                return false
+            } else {
+                try? Disk.append([movie], to: "favorite.json", in: .applicationSupport)
+                return true
+            }
+        } else {
+            try? Disk.save([movie], to: .applicationSupport, as: "favorite.json")
+            return true
+        }
+    }
+
     
 }
 

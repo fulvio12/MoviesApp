@@ -2,6 +2,7 @@
 import UIKit
 import Disk
 
+
 protocol MovieDetailView: NSObjectProtocol {
     func setMovie(movie: Movie)
     func updateView(title: String, date: String, genre: String, overview: String)
@@ -63,22 +64,6 @@ class MovieDetailViewController: UIViewController {
             } else {
                 try? Disk.append([self.presenter.movie], to: "favorite.json", in: .applicationSupport)
             }
-            
-            
-            //if the movie exists has to be deleted else has to be saved
-//            do {
-//                var retrievedFavorites = try Disk.retrieve("favorite.json", from: .applicationSupport, as: [Movie].self)
-//                let index = retrievedFavorites.index{ $0.title == self.presenter.movie.title}
-//                if let index = index {
-//                    retrievedFavorites.remove(at: index)
-//                    try Disk.save(retrievedFavorites, to: .applicationSupport, as: "favorite.json")
-//                }
-//                else {
-//                    try Disk.append([self.presenter.movie], to: "favorite.json", in: .applicationSupport)
-//                }
-//            } catch {
-//                print(error.localizedDescription)
-//            }
         } else {
             try? Disk.save([self.presenter.movie], to: .applicationSupport, as: "favorite.json")
         }

@@ -1,12 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="14113" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="14460.31" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
     <device id="retina4_7" orientation="portrait">
         <adaptation id="fullscreen"/>
     </device>
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="14088"/>
-        <capability name="Constraints to layout margins" minToolsVersion="6.0"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="14460.20"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
@@ -21,10 +20,10 @@
                 <autoresizingMask key="autoresizingMask"/>
                 <subviews>
                     <stackView opaque="NO" contentMode="scaleToFill" alignment="center" spacing="20" translatesAutoresizingMaskIntoConstraints="NO" id="8fO-dR-Xqb">
-                        <rect key="frame" x="16" y="11" width="288" height="83"/>
+                        <rect key="frame" x="16" y="11" width="288" height="115"/>
                         <subviews>
                             <imageView userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="FEn-ZD-JJA">
-                                <rect key="frame" x="0.0" y="16" width="80" height="51"/>
+                                <rect key="frame" x="0.0" y="32" width="80" height="51"/>
                                 <color key="backgroundColor" white="0.84209526909722221" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                 <constraints>
                                     <constraint firstAttribute="width" constant="80" id="Ckl-qW-dAm"/>
@@ -32,7 +31,7 @@
                                 </constraints>
                             </imageView>
                             <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" distribution="fillProportionally" alignment="top" spacing="10" translatesAutoresizingMaskIntoConstraints="NO" id="xjJ-tb-ygP">
-                                <rect key="frame" x="100" y="0.0" width="188" height="83"/>
+                                <rect key="frame" x="100" y="0.0" width="188" height="115"/>
                                 <subviews>
                                     <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Label" textAlignment="natural" lineBreakMode="wordWrap" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="0Jp-Be-9eE">
                                         <rect key="frame" x="0.0" y="0.0" width="55" height="26.5"/>
@@ -52,6 +51,16 @@
                                         <nil key="textColor"/>
                                         <nil key="highlightedColor"/>
                                     </label>
+                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="fvi-IG-sKm">
+                                        <rect key="frame" x="0.0" y="93" width="22" height="22"/>
+                                        <accessibility key="accessibilityConfiguration">
+                                            <accessibilityTraits key="traits" button="YES" image="YES"/>
+                                        </accessibility>
+                                        <state key="normal" image="favorite_empty_icon"/>
+                                        <connections>
+                                            <action selector="setFavorite:" destination="KGk-i7-Jjw" eventType="touchUpInside" id="xge-5i-bUK"/>
+                                        </connections>
+                                    </button>
                                 </subviews>
                             </stackView>
                         </subviews>
@@ -68,10 +77,14 @@
             <connections>
                 <outlet property="coverImageView" destination="FEn-ZD-JJA" id="nJW-rY-rQl"/>
                 <outlet property="dateLabel" destination="680-AW-INZ" id="LL2-uq-cej"/>
+                <outlet property="favoriteCellButton" destination="fvi-IG-sKm" id="3LM-hp-BvP"/>
                 <outlet property="genreLabel" destination="ebD-SN-zLf" id="5dD-lw-Tj9"/>
                 <outlet property="titleLabel" destination="0Jp-Be-9eE" id="lPB-vf-LWM"/>
             </connections>
             <point key="canvasLocation" x="27" y="-3"/>
         </tableViewCell>
     </objects>
+    <resources>
+        <image name="favorite_empty_icon" width="22" height="21"/>
+    </resources>
 </document>
